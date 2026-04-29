@@ -36,7 +36,6 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/market', marketRoutes); 
 
-// --- Test Route to check if server is running ---
 app.get('/', (req, res) => {
   res.status(200).json({ 
     message: "Welcome to KisaanSetu/Agri-Chain API",
@@ -44,14 +43,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// --- Socket.io Logic ---
 io.on('connection', (socket) => {
   console.log(`A farmer connected: ${socket.id}`);
 
-  // Listen for new inventory updates or rental bids
   socket.on('new_bid', (data) => {
     console.log('New bid received:', data);
-    // Broadcast the bid to everyone else in the room
     socket.broadcast.emit('receive_bid', data); 
   });
 
@@ -60,7 +56,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// --- Server Listen ---
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

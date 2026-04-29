@@ -219,7 +219,6 @@
             document.getElementById('auth-success').classList.add('hidden');
         }
 
-        // --- AUTH API ---
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
@@ -301,7 +300,6 @@
             finally { btn.innerHTML = 'Hop In! ✨'; }
         });
 
-        // --- DASHBOARD NAVIGATION ---
         function showDashboard() {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
@@ -309,7 +307,7 @@
             document.body.classList.remove('items-center', 'justify-center', 'bg-bglight'); 
             document.body.classList.add('bg-gray-100'); 
             
-            fetchUserProfile(); // Fetch the user data for the badge
+            fetchUserProfile(); 
             fetchMarketPrices(); 
             fetchInventory();
         }
@@ -337,7 +335,6 @@
             }
         }
 
-        // --- PROFILE API ---
         async function fetchUserProfile() {
             try {
                 const res = await fetch(`${API_URL}/auth/me`, {
@@ -356,7 +353,6 @@
             }
         }
 
-        // --- AI API ---
         document.getElementById('ai-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = document.getElementById('ai-input'), box = document.getElementById('ai-chat-box'), btn = document.getElementById('ai-btn');
@@ -371,7 +367,6 @@
             finally { btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>'; btn.disabled = false; box.scrollTop = box.scrollHeight; input.focus(); }
         });
 
-        // --- MARKET API ---
         async function fetchMarketPrices() {
             const grid = document.getElementById('market-grid'); grid.innerHTML = '<div class="col-span-full py-12 text-center text-brand"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4"></i></div>';
             try {
@@ -389,7 +384,6 @@
             } catch (e) {} finally { btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Add Demo Data'; }
         }
 
-        // --- INVENTORY API ---
         async function fetchInventory() {
             const list = document.getElementById('inventory-list');
             try {
@@ -397,7 +391,6 @@
                 const items = await res.json();
                 if (!items.length) return list.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-400 font-bold">Barn is empty!</td></tr>';
                 
-                // Note: The quotes around '${item.id}' are critical for MongoDB's string-based ObjectIDs!
                 list.innerHTML = items.map(item => `<tr class="border-b border-gray-100 hover:bg-emerald-50/50"><td class="px-6 py-4 font-extrabold text-gray-700">${item.cropName}</td><td class="px-6 py-4"><span class="bg-gray-100 px-3 py-1.5 rounded-lg text-gray-600 font-bold">${item.quantity} kg</span></td><td class="px-6 py-4 text-brand font-extrabold">₹${item.pricePerKg}</td><td class="px-6 py-4 text-right"><button onclick="deleteItem('${item.id}')" class="text-rose-400 hover:text-rose-600 hover:bg-rose-50 p-2 rounded-lg transition-all"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
             } catch (err) {}
         }

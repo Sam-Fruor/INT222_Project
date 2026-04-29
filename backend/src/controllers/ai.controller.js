@@ -11,7 +11,6 @@ const getCropAdvice = async (req, res) => {
       return res.status(400).json({ error: "Please provide a question." });
     }
 
-    // The system instruction acts as the strict personality for the AI
     const systemInstruction = `
       You are an expert Indian Agronomist working for 'Agri-Chain'. 
       Your job is to help farmers diagnose crop diseases, suggest fertilizers, and give farming advice.
@@ -19,7 +18,6 @@ const getCropAdvice = async (req, res) => {
       If a user asks about anything other than farming or agriculture, politely decline to answer.
     `;
 
-    // Call the Gemini model (using the fast 2.5 Flash model)
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash", 
       contents: farmerQuestion,

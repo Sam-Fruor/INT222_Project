@@ -1,6 +1,5 @@
 const MarketPrice = require('../models/MarketPrice');
 
-// 1. CREATE: Add a new market price
 const addMarketPrice = async (req, res) => {
   try {
     const { cropName, mandiLocation, price } = req.body;
@@ -18,10 +17,8 @@ const addMarketPrice = async (req, res) => {
   }
 };
 
-// 2. READ: Get all current market prices
 const getAllPrices = async (req, res) => {
   try {
-    // Sort by newest first
     const prices = await MarketPrice.find().sort({ dateUpdated: -1 });
     res.status(200).json(prices);
   } catch (error) {

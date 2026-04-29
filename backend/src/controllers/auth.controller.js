@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
 
-// 1. REGISTER & GENERATE OTP
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -31,7 +30,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-// 2. VERIFY OTP
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -51,7 +49,7 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-// 3. LOGIN
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -70,11 +68,10 @@ const loginUser = async (req, res) => {
   }
 };
 
-// 4. GET CURRENT USER PROFILE
+
 const getMe = async (req, res) => {
   try {
-    // req.user.id comes from your authenticateToken middleware!
-    // .select('-password -otp') ensures we don't accidentally send sensitive secrets to the frontend
+
     const user = await User.findById(req.user.id).select('-password -otp'); 
     
     if (!user) return res.status(404).json({ error: "User not found." });
@@ -86,5 +83,4 @@ const getMe = async (req, res) => {
   }
 };
 
-// DON'T FORGET to export the new function!
 module.exports = { registerUser, verifyOtp, loginUser, getMe };
