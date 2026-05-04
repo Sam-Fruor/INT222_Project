@@ -242,8 +242,8 @@
                     document.getElementById('auth-toggle-container').classList.add('hidden');
                     document.getElementById('auth-icon').innerText = '🔒';
                     document.getElementById('auth-title').innerText = 'Verify Email';
-                    document.getElementById('auth-subtitle').innerText = 'Check your terminal for the code!';
-                    showMessage('success', 'OTP Generated! Look at your backend VS Code terminal.');
+                    document.getElementById('auth-subtitle').innerText = 'Look at the green box below!';
+                    showMessage('success', data.message);
                 } else {
                     showMessage('error', data.error || "Failed to create account.");
                 }
