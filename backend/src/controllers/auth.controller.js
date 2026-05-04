@@ -23,7 +23,7 @@ const registerUser = async (req, res) => {
     console.log(`Subject: Verify your Agri-Chain Account`);
     console.log(`Your Secret OTP Code is: [ ${generatedOtp} ]\n`);
 
-    res.status(201).json({ message: "Account created! Please verify your OTP." });
+    res.status(201).json({ message: `Account created! DEMO MODE OTP: [ ${generatedOtp} ]` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Registration failed." });
