@@ -51,6 +51,8 @@ const registerUser = async (req, res) => {
 
     res.status(200).json({ message: "OTP sent! Please check your email inbox." });
   } catch (error) {
+    // 👇 ADD THIS CONSOLE.LOG TO FIND THE REAL ISSUE 👇
+    console.error("🚨 NODEMAILER ERROR:", error); 
     res.status(500).json({ error: "Registration failed or email could not be sent." });
   }
 };
