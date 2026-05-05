@@ -1,20 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // true for port 465
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
 const tempUsers = new Map();
 
 const registerUser = async (req, res) => {
@@ -35,11 +23,11 @@ const registerUser = async (req, res) => {
       otp: generatedOtp
     });
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
+    const emailData = {
+      sender: { name: 'Agri-Chain Team', email: process.env.EMAIL_USER },
+      to: [{ email: email, name: name }],
       subject: 'Verify your Agri-Chain Account 🚜',
-      html: `
+      htmlContent: `
         <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
             <h2 style="color: #059669;">Welcome to Agri-Chain, ${name}! 🌱</h2>
             <p style="color: #4b5563;">Your 4-digit verification code is:</p>
@@ -49,12 +37,22 @@ const registerUser = async (req, res) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(emailData)
+    });
+
+    if (!response.ok) {
+      throw new Error("Brevo API rejected the request.");
+    }
 
     res.status(200).json({ message: "OTP sent! Please check your email inbox." });
   } catch (error) {
-    // 👇 ADD THIS CONSOLE.LOG TO FIND THE REAL ISSUE 👇
-    console.error("🚨 NODEMAILER ERROR:", error); 
     res.status(500).json({ error: "Registration failed or email could not be sent." });
   }
 };
