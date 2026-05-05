@@ -74,10 +74,7 @@
         </form>
 
         <form id="otp-form" class="space-y-4 text-left hidden animate-pop">
-            <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-4 text-center">
-    <p class="text-sm text-blue-600 font-bold">Demo Mode Active 🕵️‍♂️</p>
-    <p class="text-xs text-blue-500 mt-1">Look at the success message above for your 4-digit code!</p>
-</div>
+           
             <div>
                 <label class="block text-sm font-bold text-gray-500 mb-1 pl-2 text-center">Enter 4-Digit OTP</label>
                 <input type="text" id="reg-otp" required maxlength="4" class="w-full px-5 py-4 bg-gray-50 border-2 border-emerald-50 rounded-2xl focus:outline-none focus:border-brand transition-all font-extrabold text-center text-3xl tracking-[0.5em]" placeholder="0000">
@@ -131,9 +128,7 @@
                         <h2 class="text-4xl font-extrabold text-gray-800 flex items-center gap-3">Live Market Prices <span class="animate-float inline-block">📈</span></h2>
                         <p class="text-gray-500 mt-2 font-medium">Real-time NaapTol data tracked in MongoDB</p>
                     </div>
-                    <button onclick="seedDemoData()" id="seed-btn" class="px-5 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-branddark font-bold rounded-xl transition-all shadow-sm hover:shadow-md text-sm flex items-center gap-2 transform hover:-translate-y-1">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Add Demo Data
-                    </button>
+                    
                 </div>
                 <div id="market-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"></div>
             </section>
@@ -375,14 +370,7 @@
                 grid.innerHTML = prices.map((item, i) => `<div class="bg-white border-2 border-emerald-50 rounded-[2rem] p-6 animate-bounce-hover transition-all shadow-md group opacity-0 animate-pop" style="animation-delay: ${(i%4)*100}ms; animation-fill-mode: forwards;"><div class="flex justify-between items-start mb-6"><div><h3 class="text-xl font-extrabold text-gray-800">${item.cropName}</h3><p class="text-sm font-bold text-gray-400"><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${item.mandiLocation}</p></div><span class="bg-emerald-100 text-branddark font-extrabold px-3 py-1.5 rounded-xl">₹${item.price} <span class="text-xs opacity-70">/kg</span></span></div></div>`).join('');
             } catch (err) {}
         }
-        async function seedDemoData() {
-            const btn = document.getElementById('seed-btn'); btn.innerHTML = 'Adding...';
-            try {
-                for (let crop of [{ cropName: "Red Tomatoes 🍅", mandiLocation: "Nashik Wholesale", price: 45 }, { cropName: "Premium Wheat 🌾", mandiLocation: "Punjab Mandi", price: 32 }]) 
-                    await fetch(`${API_URL}/market/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }, body: JSON.stringify(crop) });
-                fetchMarketPrices();
-            } catch (e) {} finally { btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Add Demo Data'; }
-        }
+        
 
         async function fetchInventory() {
             const list = document.getElementById('inventory-list');

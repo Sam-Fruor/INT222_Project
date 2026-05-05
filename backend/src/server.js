@@ -3,28 +3,24 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const mongoose = require('mongoose'); // 👈 Import Mongoose
+const mongoose = require('mongoose'); 
 
-// Initialize Express App
 const app = express();
 const server = http.createServer(app);
 
-// 👈 Connect to MongoDB (Make sure MONGO_URI is in your .env)
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('🍃 MongoDB Connected Successfully!'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// Initialize Socket.io (For Unit III: Real-time Bidding/Chat)
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins for development
+    origin: "*", 
     methods: ["GET", "POST"]
   }
 });
 
-// Basic Middlewares (For Unit II & III)
 app.use(cors());
-app.use(express.json()); // To parse JSON bodies
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/auth.routes');
 const inventoryRoutes = require('./routes/inventory.routes');

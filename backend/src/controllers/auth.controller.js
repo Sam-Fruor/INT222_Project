@@ -1,8 +1,19 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+const tempUsers = new Map();
 
 const registerUser = async (req, res) => {
   try {
@@ -14,19 +25,33 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    await User.create({
-      name, email, password: hashedPassword, role, otp: generatedOtp, isVerified: false
+    tempUsers.set(email, {
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      otp: generatedOtp
     });
 
-    console.log(`\n📧 NEW EMAIL SIMULATION 📧`);
-    console.log(`To: ${email}`);
-    console.log(`Subject: Verify your Agri-Chain Account`);
-    console.log(`Your Secret OTP Code is: [ ${generatedOtp} ]\n`);
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Verify your Agri-Chain Account 🚜',
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+            <h2 style="color: #059669;">Welcome to Agri-Chain, ${name}! 🌱</h2>
+            <p style="color: #4b5563;">Your 4-digit verification code is:</p>
+            <h1 style="color: #34d399; letter-spacing: 8px; font-size: 36px; background-color: #ecfdf5; padding: 15px; border-radius: 10px; display: inline-block;">${generatedOtp}</h1>
+            <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">Please enter this code on the verification screen to activate your account. If you didn't request this, please ignore this email.</p>
+        </div>
+      `
+    };
 
-    res.status(201).json({ message: `Account created! DEMO MODE OTP: [ ${generatedOtp} ]` });
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "OTP sent! Please check your email inbox." });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Registration failed." });
+    res.status(500).json({ error: "Registration failed or email could not be sent." });
   }
 };
 
@@ -34,21 +59,28 @@ const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: "User not found." });
-    if (user.otp !== otp) return res.status(400).json({ error: "Invalid OTP code." });
+    const tempUser = tempUsers.get(email);
 
-    user.isVerified = true;
-    user.otp = null;
-    await user.save();
+    if (!tempUser) return res.status(404).json({ error: "OTP expired or invalid email." });
+    if (tempUser.otp !== otp) return res.status(400).json({ error: "Invalid OTP code." });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-    res.status(200).json({ message: "Verification successful!", token });
+    const newUser = await User.create({
+      name: tempUser.name,
+      email: tempUser.email,
+      password: tempUser.password,
+      role: tempUser.role,
+      isVerified: true,
+      otp: null
+    });
+
+    tempUsers.delete(email);
+
+    const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: '1d' });
+    res.status(201).json({ message: "Verification successful! Account created.", token });
   } catch (error) {
     res.status(500).json({ error: "Verification failed." });
   }
 };
-
 
 const loginUser = async (req, res) => {
   try {
@@ -56,7 +88,6 @@ const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: "User not found." });
-    if (!user.isVerified) return res.status(403).json({ error: "Please verify your email first." });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials." });
@@ -68,17 +99,12 @@ const loginUser = async (req, res) => {
   }
 };
 
-
 const getMe = async (req, res) => {
   try {
-
-    const user = await User.findById(req.user.id).select('-password -otp'); 
-    
+    const user = await User.findById(req.user.id).select('-password -otp');
     if (!user) return res.status(404).json({ error: "User not found." });
-
     res.status(200).json(user);
   } catch (error) {
-    console.error("Profile Fetch Error:", error);
     res.status(500).json({ error: "Failed to fetch user profile." });
   }
 };
