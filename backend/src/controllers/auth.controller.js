@@ -15,48 +15,41 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    tempUsers.set(email, {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      otp: generatedOtp
-    });
+    tempUsers.set(email, { name, email, password: hashedPassword, role, otp: generatedOtp });
 
-    const emailData = {
-      sender: { name: 'Agri-Chain Team', email: process.env.EMAIL_USER },
-      to: [{ email: email, name: name }],
-      subject: 'Verify your Agri-Chain Account 🚜',
-      htmlContent: `
-        <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-            <h2 style="color: #059669;">Welcome to Agri-Chain, ${name}! 🌱</h2>
-            <p style="color: #4b5563;">Your 4-digit verification code is:</p>
-            <h1 style="color: #34d399; letter-spacing: 8px; font-size: 36px; background-color: #ecfdf5; padding: 15px; border-radius: 10px; display: inline-block;">${generatedOtp}</h1>
-            <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">Please enter this code on the verification screen to activate your account. If you didn't request this, please ignore this email.</p>
-        </div>
-      `
-    };
-
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
+    // Send the email using Mailtrap's HTTP API (Bypasses Render's port blocks!)
+    const response = await fetch("https://send.api.mailtrap.io/api/send", {
+      method: "POST",
       headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'content-type': 'application/json'
+        "Authorization": `Bearer ${process.env.MAILTRAP_TOKEN}`,
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(emailData)
+      body: JSON.stringify({
+        from: { email: "hello@demomailtrap.co", name: "Agri-Chain Team" },
+        to: [{ email: email }], 
+        subject: "Verify your Agri-Chain Account 🚜",
+        html: `
+          <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+              <h2 style="color: #059669;">Welcome to Agri-Chain, ${name}! 🌱</h2>
+              <p style="color: #4b5563;">Your 4-digit verification code is:</p>
+              <h1 style="color: #34d399; letter-spacing: 8px; font-size: 36px; background-color: #ecfdf5; padding: 15px; border-radius: 10px; display: inline-block;">${generatedOtp}</h1>
+              <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">Please enter this code on the verification screen to activate your account.</p>
+          </div>
+        `,
+        category: "OTP Verification"
+      })
     });
 
     if (!response.ok) {
-      throw new Error("Brevo API rejected the request.");
+      const errorText = await response.text();
+      console.error("🚨 MAILTRAP REJECTED:", errorText);
+      throw new Error("Mailtrap API rejected the request.");
     }
 
     res.status(200).json({ message: "OTP sent! Please check your email inbox." });
   } catch (error) {
-    console.error("🚨 CRITICAL REGISTRATION ERROR:", error);
-    if (error.cause) console.error("Cause:", error.cause);
-    
-    res.status(500).json({ error: "Registration failed or email could not be sent." });
+    console.error("🚨 REGISTRATION ERROR:", error);
+    res.status(500).json({ error: "Registration failed." });
   }
 };
 
