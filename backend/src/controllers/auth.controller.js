@@ -53,6 +53,9 @@ const registerUser = async (req, res) => {
 
     res.status(200).json({ message: "OTP sent! Please check your email inbox." });
   } catch (error) {
+    console.error("🚨 CRITICAL REGISTRATION ERROR:", error);
+    if (error.cause) console.error("Cause:", error.cause);
+    
     res.status(500).json({ error: "Registration failed or email could not be sent." });
   }
 };
