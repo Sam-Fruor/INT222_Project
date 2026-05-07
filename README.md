@@ -1,6 +1,8 @@
 ```markdown
 # 🌱 Agri-Chain Backend
 
+**🌐 Live Demo:** [https://int-222-project-eight.vercel.app/](https://int-222-project-eight.vercel.app/)
+
 Agri-Chain is a robust Node.js and MongoDB backend system designed to manage secure user authentication, role-based access, and seamless onboarding for digital farming solutions. 
 
 This repository houses the core REST APIs, featuring a fully functional email-based OTP verification system built to bypass standard SMTP firewalls using external HTTP APIs.
